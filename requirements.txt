@@ -1,0 +1,11 @@
+langgraph>=1.0,<2
+langchain-openai>=1.0,<2
+langchain-text-splitters>=1.0,<2
+chromadb>=1.4,<2
+pypdf>=6.6,<7
+python-dotenv>=1.2,<2
+nbformat>=5.10,<6
+nbclient>=0.10,<1
+nbconvert>=7.17,<8
+ipykernel>=7,<8
+pytest>=9,<10
