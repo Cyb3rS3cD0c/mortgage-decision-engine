@@ -21,7 +21,7 @@ cells=[]
 def md(text):cells.append(nbf.v4.new_markdown_cell(text))
 def code(text):cells.append(nbf.v4.new_code_cell(text))
 md('''# Senior Mortgage Underwriting System
-Johns Hopkins University · Agentic AI · Student: DrJay · November 11, 2026
+Johns Hopkins University · Agentic AI · Student: Dr. Jay Lavoie · November 11, 2026
 
 This educational project combines deterministic financial calculations, four specialist LLM analyses, retrieved policy evidence, quality review and human oversight. This notebook contains the complete implementation and bundled private assignment inputs. It requires installed third-party dependencies and a university API credential, but no project source files.
 
@@ -56,7 +56,7 @@ for package in ['langgraph','langchain-openai','chromadb','pypdf','nbclient','nb
     print(package, version(package))
 print('Credential loaded: yes (value hidden); model: gpt-4o-mini')
 ''')
-md('## Part 1 Core Agent Implementation\n### 1A Utility tools for calculations (3 marks)\nTools validate finite nonnegative inputs, count each debt once and calculate post-closing reserves. Invalid denominators are rejected.')
+md('## Part 1 Core Agent Implementation\n### 1A Utility tools for calculations\nTools validate finite nonnegative inputs, count each debt once and calculate post-closing reserves. Invalid denominators are rejected.')
 core=(REPO/'src/mortgage_engine/core.py').read_text(encoding='utf-8')
 code(core)
 code('''tool_examples = {
@@ -72,7 +72,7 @@ for bad_income in [0,-1,float('nan'),float('inf')]:
     try: calculate_dti_ratio.invoke({'monthly_debt':100,'monthly_income':bad_income})
     except ValueError: print('Expected validation failure for invalid income:', str(bad_income))
 ''')
-md('### 1B PII sanitization (2 marks) and bias detection (2 marks)\nDeep sanitization covers nested data, email, phone, names and narrative repetitions. Word boundaries prevent “age” matching “mortgage”. Bias signals require review and are not proof of unlawful discrimination or compliance.')
+md('### 1B PII sanitization and bias detection\nDeep sanitization covers nested data, email, phone, names and narrative repetitions. Word boundaries prevent “age” matching “mortgage”. Bias signals require review and are not proof of unlawful discrimination or compliance.')
 code('''synthetic = {'name':'Example Borrower','ssn':'111-22-3333','email':'sample@example.invalid',
  'nested':{'phone':'(415) 555-9876','note':'Example Borrower at sample@example.invalid'},'income':10000}
 safe = sanitize_pii(synthetic)
@@ -83,7 +83,7 @@ print('Biased wording:',detect_bias_signals('Reject the applicant because of rel
 print('Neutral wording:',detect_bias_signals('Mortgage coverage and property condition'))
 print('Limitation: a neutral result is not a fairness certification.')
 ''')
-md('### 1C RAG policy retrieval (2 marks)\nThe private policy PDF is bundled below to make this notebook independent of local source files. Personalized license footers are removed before embedding. The pipeline splits pages, calls live embeddings, stores them in Chroma, and displays retrieved text with page citations. No silent fallback is used.')
+md('### 1C RAG policy retrieval\nThe private policy PDF is bundled below to make this notebook independent of local source files. Personalized license footers are removed before embedding. The pipeline splits pages, calls live embeddings, stores them in Chroma, and displays retrieved text with page citations. No silent fallback is used.')
 services=(REPO/'src/mortgage_engine/services.py').read_text(encoding='utf-8').replace('from .core import sanitize_pii','')
 code(services)
 pdf64=base64.b64encode((SOURCE/'underwriting_policies.pdf').read_bytes()).decode()
@@ -96,7 +96,7 @@ for item in retrieved:
     print(item['text'])
     print('-'*60)
 ''')
-md('### 1D Test data preparation (1 mark)\nOriginal fixtures are bundled unchanged. Sanitized views are used for all visible reports and model inputs. Supplied labels are retained only for evaluation. The original DTI values and debt aggregation conflict with calculated values; the comparison below exposes the issue.')
+md('### 1D Test data preparation\nOriginal fixtures are bundled unchanged. Sanitized views are used for all visible reports and model inputs. Supplied labels are retained only for evaluation. The original DTI values and debt aggregation conflict with calculated values; the comparison below exposes the issue.')
 data=json.loads((SOURCE/'mortgage_test_cases.json').read_text(encoding='utf-8'))
 code('original_test_data = json.loads('+repr(json.dumps(data))+')\ntest_cases = original_test_data["test_cases"]\nprint("Loaded",len(test_cases),"original cases; identifiers suppressed in output.")')
 code('''for case in test_cases:
@@ -108,10 +108,10 @@ print('Interpretation: corrected DTI exceeds the supplied policy ceiling of 50% 
 print('Do not change fixtures or force model outputs to match inconsistent expected labels.')
 ''')
 md('''## Part 2 Workflow and Orchestration
-### 2A Specialist agents and coordination (5 marks)
+### 2A Specialist agents and coordination
 The complete implementation below defines credit, income, asset, collateral, critic and decision agents. Each analysis receives sanitized application data, deterministic metrics and retrieved policy evidence. Prompts are triple-quoted and visible in code. All six analyses are displayed separately per supplied case in Part 3.
 
-### 2B State and workflow graph (2 marks)
+### 2B State and workflow graph
 A typed state holds analyses, evidence, policy conditions, scores and timestamped audit events. A supervisor runs specialists sequentially, then critic and decision. Hard policy failures override score bands. Human review is required for risk >30, DTI >43%, LTV >90%, any bias flags or denial. The graph genuinely interrupts; the explicit simulation record resumes it. Raw PII never enters checkpoints.
 ''')
 workflow=(REPO/'src/mortgage_engine/workflow.py').read_text(encoding='utf-8')
@@ -122,7 +122,7 @@ graph = build_workflow(live_model,policy_store)
 print(graph.get_graph().draw_mermaid())
 print('Graph compiled with in-memory checkpointing and real human-review interrupts.')
 ''')
-md('''## Part 3 Testing and Analysis (1 mark)
+md('''## Part 3 Testing and Analysis
 ### 3A Run all supplied test cases
 All real model analyses and retrieved policy page references are retained. Human-review resumes below use clearly labeled **simulated** reviewer decisions for reproducible execution. They do not represent a person approving a real loan. Expected-label mismatches are reported honestly.
 ''')
@@ -182,15 +182,15 @@ for test_name,func in list(globals().items()):
 print('Regression assertions passed:',regression_count)
 assert len(results)==3 and all(r['status']=='COMPLETE' for r in results)
 ''')
-md('''## Part 4 Summary and Future Scope (2 marks)
-### 4A Summary and observations (1 mark)
+md('''## Part 4 Summary and Future Scope
+### 4A Summary and observations
 Deterministic tools revealed that the supplied DTI fields omit proposed housing payments and that the starter also counts aggregate debts twice. Correcting these defects changes the financial interpretation: all three supplied cases exceed the educational policy ceiling, so the first two expected outcomes cannot be treated as ground truth. The third case additionally has insufficient closing funds, a subminimum conventional score and repair concerns.
 
 The system demonstrates live policy embeddings and Chroma retrieval, six separate LLM roles, supervisor routing, critic review, policy-controlled recommendations, actual interrupt/resume, simulated review records, credit memos and executive summaries. Retrieved policy excerpts and page references make the source evidence inspectable. Review triggers remain independent of the model narrative. Separate synthetic regression cases demonstrate low-risk completion and failure handling that the three flawed supplied fixtures cannot cover.
 
 The execution outputs above are the evidence for observed behavior. We do not claim real-world accuracy, processing-time savings, legal compliance or fairness from these three examples.
 
-### 4B Future scope (1 mark)
+### 4B Future scope
 1. Expand the labeled evaluation set with reviewed financial inputs, realistic counterfactual pairs, protected-class fairness analysis and expert-adjudicated outcomes.
 2. Add program-specific rules, structured verification of income and property documents, citation validation, bounded critic re-analysis and calibrated scoring based on representative historical data.
 3. Implement authenticated reviewers, encrypted durable checkpoints, access-controlled audit retention, policy versioning, deployment monitoring and approved integrations with real lending systems.
